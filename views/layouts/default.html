@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{$html->charset()}
+	<title>
+		{__('CakePHP: the rapid development php framework:')}
+		{$title_for_layout}
+	</title>
+	{$html->meta('icon')}
+
+	{$html->css('cake.generic')}
+
+	{$scripts_for_layout}
+</head>
+<body>
+	<div id="container">
+		<div id="header">
+			<h1>{link url="http://cakephp.org"}{__('CakePHP: the rapid development php framework', true)}{/link}</h1>
+		</div>
+		<div id="content">
+
+			{$session->flash()}
+
+			{$content_for_layout}
+
+		</div>
+		<div id="footer">
+			{link url='http://www.cakephp.org/' target='_blank' escape=false}{image src='cake.power.gif' alt=__('CakePHP: the rapid development php framework', true) border=0}{/link}
+		</div>
+	</div>
+	{sql_dump}
+</body>
+</html>
