@@ -34,6 +34,7 @@
  */
 
 App::import('Vendor', 'Smarty.Smarty', array('file' => 'libs'.DS.'Smarty.class.php'));
+App::import('View', 'Theme');
 
 class CakeSmarty extends Smarty {
 	public $view;
@@ -87,8 +88,7 @@ class CakeSmarty extends Smarty {
 	}
 }
 
-class SmartyView extends View
-{
+class SmartyView extends ThemeView {
 	static public function smarty($view = null) {
 		$smarty = new CakeSmarty();
 		$smarty->view = $view;
@@ -100,12 +100,13 @@ class SmartyView extends View
 		$smarty->template_dir = VIEWS.DS;
 		$smarty->config_dir = VIEWS. DS. 'config'.DS;
 		
-		$smarty->cache = true;
+		$smarty->cache = false;
 		
 		try {
 			$smarty->configLoad('default.ini');
 		} catch (SmartyException $e) {
-			$this->debug("can't find 'default.ini'");
+			$obj = new Object();
+			$obj->log("can't find 'default.ini'", LOG_DEBUG);
 			// ignore
 		}
 		
@@ -117,150 +118,66 @@ class SmartyView extends View
  *
  * @param  $controller instance of calling controller
  */
-	function __construct (&$controller)
-	{
+	function __construct (&$controller) {
 		parent::__construct($controller);
+		
 		$this->Smarty = SmartyView::smarty($this);
 		
-		$this->ext= '.html';
+		if ($this->ext == '.ctp') {
+			$this->ext = '.html';
+		}
 	}
 
 /**
- * Overrides the View::_render()
- * Sets variables used in CakePHP to Smarty variables
+ * Renders and returns output for given view filename with its
+ * array of data. If viewFilename has extension .ctp, then it delegates
+ * the rendering to parent.
  *
- * @param string $___viewFn
- * @param string $___data_for_view
- * @param string $___play_safe
- * @param string $loadHelpers
- * @return rendered views
+ * @param string $___viewFn Filename of the view
+ * @param array $___dataForView Data to include in rendered view
+ * @param boolean $loadHelpers Boolean to indicate that helpers should be loaded.
+ * @param boolean $cached Whether or not to trigger the creation of a cache file.
+ * @return string Rendered output
+ * @access protected
  */
-	function _render($___viewFn, $___data_for_view, $___play_safe = true, $loadHelpers = true)
-	{
-		if ($this->helpers != false && $loadHelpers === true)
-		{
-			$loadedHelpers =  array();
+	function _render($___viewFn, $___data_for_view, $loadHelpers = true, $cached = false) {
+		$ext = pathinfo($___viewFn, PATHINFO_EXTENSION);
+		if ($ext == 'ctp') {
+			return parent::_render($___viewFn, $___data_for_view, $loadHelpers, $cached);
+		}
+		
+		if ($this->helpers != false and $loadHelpers === true) {
 			$loadedHelpers = $this->_loadHelpers($loadedHelpers, $this->helpers);
-
-			foreach(array_keys($loadedHelpers) as $helper)
-			{
-				$replace = strtolower(substr($helper, 0, 1));
-				$camelBackedHelper = preg_replace('/\\w/', $replace, $helper, 1);
-
-				${$camelBackedHelper} =& $loadedHelpers[$helper];
-				if(isset(${$camelBackedHelper}->helpers) && is_array(${$camelBackedHelper}->helpers))
-				{
-					foreach(${$camelBackedHelper}->helpers as $subHelper)
-					{
-						${$camelBackedHelper}->{$subHelper} =& $loadedHelpers[$subHelper];
-					}
-				}
-				$this->loaded[$camelBackedHelper] = (${$camelBackedHelper});
-				$this->Smarty->assignByRef($camelBackedHelper, ${$camelBackedHelper});
+			$helpers = array_keys($loadedHelpers);
+			
+			foreach ($loadedHelpers as $name => $helper) {
+				$helperName = Inflector::variable($name);
+				$this->loaded[$helperName] = $helper;
+				$this->{$name} = $helper;
+			}
+			$this->_triggerHelpers('beforeRender');
+			
+			foreach ($this->loaded as $name => $helper) {
+				$this->Smarty->assignByRef($name, $helper);
 			}
 		}
-
-		$this->register_functions();
-
-		foreach($___data_for_view as $data => $value)
-		{
-			if(!is_object($data))
-			{
+		
+		foreach($___data_for_view as $data => $value) {
+			if (!is_object($data)) {
 				$this->Smarty->assign($data, $value);
 			}
 		}
+		
 		$this->Smarty->assignByRef('view', $this);
-		return $this->Smarty->fetch($___viewFn);
-	}
-	
-/**
- * Returns layout filename for this template as a string.
- *
- * @param string $name The name of the layout to find.
- * @return string Filename for layout file.
- * @return string Filename for layout file.
- * @access private
- */
-	function _getLayoutFileName($name = null) {
-		if ($name === null) {
-			$name = $this->layout;
-		}
-		$subDir = null;
-
-		if (!is_null($this->layoutPath)) {
-			$subDir = $this->layoutPath . DS;
+		$this->Smarty->cache = $cached;
+		
+		$out = $this->Smarty->fetch($___viewFn);
+		
+		if ($loadHelpers === true) {
+			$this->_triggerHelpers('afterRender');
 		}
 		
-		if (isset($this->plugin) && !is_null($this->plugin)) {
-			$layoutFileName = APP . 'plugins' . DS . $this->plugin . DS . 'views' . DS . 'layouts' . DS . $this->layout . $this->ext;
-			if (file_exists($layoutFileName)) {
-				return $layoutFileName;
-			}
-		}
-		
-        foreach(App::path('views') as $view_path) { 
-            $layoutFileName = $view_path . 'layouts' . DS . $this->layout . $this->ext; 
-            if (file_exists($layoutFileName)) { 
-                return $layoutFileName; 
-            } 
-        } 
-
-		$layoutFileName = __DIR__ . DS . 'layouts' . DS . $this->layout. '.html';
-		return $layoutFileName;
-	}
-
-/**
- * Returns filename of given action's template file (.tpl) as a string. CamelCased action names will be under_scored! This means that you can have LongActionNames that refer to long_action_names views.
- *
- * @param string $action Controller action to find template filename for
- * @return string Template filename
- * @access private
- */
-	function _getViewFileName($action) {
-		$action = Inflector::underscore($action);
-
-		if (empty($action)) {
-			$action = $this->action;
-		}
-
-		$position = strpos($action, '..');
-
-		if ($position === false) {
-		} else {
-			$action = explode('/', $action);
-			$i = array_search('..', $action);
-			unset($action[$i - 1]);
-			unset($action[$i]);
-			$action='..' . DS . implode(DS, $action);
-		}
-
-		foreach(App::path('views') as $view_path) {
-			$viewFileName = $view_path . $this->viewPath . DS . $action . $this->ext;
-			if (file_exists($viewFileName)) {
-				return $viewFileName;
-			}
-		}
-
-		$viewFileName = VIEWS . $this->viewPath . DS . $action . $this->ext;
-
-		return $viewFileName;
-	}
-
-	/**
-	 * checks for existence of special method on loaded helpers, invoking it if it exists
-	 * this allows helpers to register smarty functions, modifiers, blocks, etc.
-	 */
-	function register_functions() {
-		foreach(array_keys($this->loaded) as $helper) {
-			if (method_exists($this->loaded[$helper], '_register_smarty_functions')) {
-				$this->loaded[$helper]->_register_smarty_functions($this->Smarty);
-			}
-		}
-	}
-	
-	private function path(/* ... */) {
-		$cmp = func_get_args();
-		return join(DS, array_filter($cmp));
+		return $out;
 	}
 }
 
