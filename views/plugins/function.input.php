@@ -1,19 +1,12 @@
 <?php
 
 function smarty_function_input($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
-		trigger_error("{input} command requires Form helper.", E_USER_ERROR);
-	}
+	$s = $template->smarty;
+	$form = $s->viewHelper('input', 'form');
+	$s->fixHtmlAttributes($params);
 	
-	$name = 'foo';
+	$name = $s->fetchVar($params, 'name', 'fieldName');
 	
-	extract(compact('template') + $params);
-	
-	unset($params['name']);
-	
-	$form = $template->smarty->view->loaded['form'];
-	
-	
-	return $form->input('hello', $params);
+	return $form->input($name, $params);
 }
 

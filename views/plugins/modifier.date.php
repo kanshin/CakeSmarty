@@ -22,6 +22,9 @@ function smarty_modifier_date($value, $format = null) {
 		try {
 			$format = $smarty->getConfigVars('date_format');
 		} catch (SmartyException $e) {
+		}
+		
+		if (empty($format)) {
 			$format = 'Y.n.j';
 		}
 	}
