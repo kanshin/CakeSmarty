@@ -11,6 +11,7 @@ function smarty_block_link($params, $content, $template, &$repeat) {
 		
 		$smarty->fixHtmlAttributes($params);
 		
+		$params['escape'] = false;
 		return $html->link($content, $url, $params, $confirm);
 	}
 }

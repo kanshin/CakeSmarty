@@ -1,19 +1,13 @@
 <?php
 
-function smarty_function_button($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
-		trigger_error("{button} command requires Form helper.", E_USER_ERROR);
-	}
+function smarty_function_radio($params, $template) {
+	$s = $template->smarty;
+	$form = $s->viewHelper('radio', 'form');
+	$s->fixHtmlAttributes($params);
 	
-	$title = 'button';
+	$name = $s->fetchVar($params, 'name', 'fieldName');
+	$options = $s->fetchVar($params, 'options', 'values');
 	
-	extract(compact('template') + $params);
-	
-	unset($params['title']);
-	
-	$form = $template->smarty->view->loaded['form'];
-	
-	
-	return $form->button($title, $params);
+	return $form->radio($name, $options, $params);
 }
 
