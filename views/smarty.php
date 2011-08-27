@@ -94,7 +94,7 @@ class SmartyView extends ThemeView {
 		$smarty->view = $view;
 		
 		$smarty->plugins_dir[] = VIEWS.'plugins'.DS;
-		$smarty->plugins_dir[] = __DIR__. DS. 'plugins'.DS;
+		$smarty->plugins_dir[] = dirname(__FILE__). DS. 'plugins'.DS;
 		$smarty->compile_dir = TMP.'smarty'.DS.'compile'.DS;
 		$smarty->cache_dir = TMP.'smarty'.DS.'cache'.DS;
 		$smarty->template_dir = VIEWS.DS;
