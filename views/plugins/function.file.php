@@ -1,18 +1,11 @@
 <?php
 
 function smarty_function_file($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
-		trigger_error("{file} command requires Form helper.", E_USER_ERROR);
-	}
+	$s = $template->smarty;
+	$form = $s->viewHelper('file', 'form');
+	$s->fixHtmlAttributes($params);
 	
-	$name = 'foo';
-	
-	extract(compact('template') + $params);
-	
-	unset($params['name']);
-	
-	$form = $template->smarty->view->loaded['form'];
-	
+	$name = $s->fetchVar($params, 'name', 'fieldName');
 	
 	return $form->file($name, $params);
 }
