@@ -16,18 +16,9 @@
  * Redistributions of files must retain the above copyright notice.
  *
  * @filesource
- * @copyright    Copyright (c) 2005, Cake Software Foundation, Inc.
- * @link         http://www.cakefoundation.org/projects/info/cakephp CakePHP Project
- * @version      1.0.0.7
  * @package      cake
  * @subpackage   cake.app.views
- * @since        CakePHP v 0.10.4.1693
- * @version      $Revision$
- * @modifiedby   $LastChangedBy$
- * @lastmodified $Date$
  * @license      http://www.opensource.org/licenses/mit-license.php The MIT License
- *
- * update: 10/03/07 by tclineks
 
 /**
  * Include Smarty. By default expects it at ( VENDORS.'smarty'.DS.'Smarty.class.php' )
@@ -121,8 +112,6 @@ class SmartyView extends ThemeView {
 	function __construct (&$controller) {
 		parent::__construct($controller);
 		
-		$this->Smarty = SmartyView::smarty($this);
-		
 		if ($this->ext == '.ctp') {
 			$this->ext = '.html';
 		}
@@ -156,22 +145,23 @@ class SmartyView extends ThemeView {
 				$this->{$name} = $helper;
 			}
 			$this->_triggerHelpers('beforeRender');
-			
-			foreach ($this->loaded as $name => $helper) {
-				$this->Smarty->assignByRef($name, $helper);
-			}
+		}
+		
+		$smarty = SmartyView::smarty($this);
+		foreach ($this->loaded as $name => $helper) {
+			$smarty->assign($name, $helper);
 		}
 		
 		foreach($___data_for_view as $data => $value) {
 			if (!is_object($data)) {
-				$this->Smarty->assign($data, $value);
+				$smarty->assign($data, $value);
 			}
 		}
 		
-		$this->Smarty->assignByRef('view', $this);
-		$this->Smarty->cache = $cached;
+		$smarty->assignByRef('view', $this);
+		$smarty->cache = $cached;
 		
-		$out = $this->Smarty->fetch($___viewFn);
+		$out = $smarty->fetch($___viewFn);
 		
 		if ($loadHelpers === true) {
 			$this->_triggerHelpers('afterRender');
