@@ -134,7 +134,7 @@ function smarty_block_paginator($params, $content, $template, &$repeat) {
 		
 		$smarty->fixHtmlAttributes($params);
 		
-		return $html->tag($tag, $content);
+		return $html->tag($tag, $content, $params);
 	}
 }
 
