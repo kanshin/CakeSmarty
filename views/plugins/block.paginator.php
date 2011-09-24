@@ -25,11 +25,33 @@ class PaginatorBlock {
 			array_intersect_key($url, array('plugin' => true))
 		);
 		
-		return $this->paginator->url($url);
+		$model = $this->model;
+		
+		$options = $this->paginator->options;
+		if (isset($options['url'])) {
+			$url = array_merge((array)$options['url'], (array)$url);
+		}
+		
+		return $this->paginator->url($url, false, $this->model);
 	}
 	
 	public function current() {
 		return $this->paginator->current($this->model);
+	}
+	
+	public function varNames() {
+		return array(
+			'has_prev', 
+			'has_next', 
+			'page_count', 
+			'count', 
+			'limit', 
+			'current', 
+			'first_url',
+			'prev_url',
+			'next_url',
+			'last_url',
+		);
 	}
 	
 	public function vars() {
@@ -78,7 +100,7 @@ class PaginatorBlock {
 	public function saveVars() {
 		$t = $this->template;
 		$vars = array();
-		foreach (array_keys($this->vars()) as $key) {
+		foreach ($this->varNames() as $key) {
 			$vars[$key] = $t->getTemplateVars($key);
 		}
 		return $vars;
