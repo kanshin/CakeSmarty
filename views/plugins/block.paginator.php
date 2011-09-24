@@ -12,10 +12,6 @@ class PaginatorBlock {
 		$this->template = $template;
 		$this->paginator = $smarty->viewHelper('paginator', 'paginator');
 		$this->model = $smarty->fetchVar($params, 'model');
-		
-		if ($this->model == null) {
-			$this->model = $this->paginator->defaultModel();
-		}
 	}
 	
 	public function url($url = array()) {
