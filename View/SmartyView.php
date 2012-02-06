@@ -24,22 +24,28 @@
  * Include Smarty. By default expects it at ( VENDORS.'smarty'.DS.'Smarty.class.php' )
  */
 
+//App::import('Vendor', 'Smarty.Smarty', array('file' => 'libs'.DS.'Smarty.class.php'));
+//App::import('Vendor', 'Smarty', array('file' => 'smarty'.DS.'Smarty.class.php'));
 App::import('View', 'Theme');
+App::uses('CakeSmarty', 'Smarty.View');
 
 class SmartyView extends ThemeView {
+	private $smarty;
+
 	static public function smarty($view = null) {
 		$smarty = new CakeSmarty();
 		$smarty->view = $view;
-		
-		$smarty->plugins_dir[] = VIEWS.'plugins'.DS;
-		$smarty->plugins_dir[] = dirname(__FILE__). DS. 'plugins'.DS;
+
+		$smarty->setPluginsDir(array(
+			dirname(__FILE__).DS.'..'.DS.'Vendor'.DS.'smarty'.DS.'libs'.DS.'plugins'.DS,
+			dirname(__FILE__).DS.'plugins'.DS,
+			APP.DS.'View'.DS.'Smarty'.DS.'plugins'.DS,
+		));
 		$smarty->compile_dir = TMP.'smarty'.DS.'compile'.DS;
 		$smarty->cache_dir = TMP.'smarty'.DS.'cache'.DS;
-		$smarty->template_dir = VIEWS.DS;
-		$smarty->config_dir = VIEWS. DS. 'config'.DS;
-		
-		$smarty->cache = false;
-		
+		$smarty->template_dir = APP.DS.'View'.DS;
+		$smarty->config_dir = APP.DS.'View'. DS. 'Smarty'.DS;
+
 		try {
 			$smarty->configLoad('default.ini');
 		} catch (SmartyException $e) {
@@ -47,74 +53,74 @@ class SmartyView extends ThemeView {
 			$obj->log("can't find 'default.ini'", LOG_DEBUG);
 			// ignore
 		}
-		
+
 		return $smarty;
-	}
-	
-/**
- * SmartyView constructor
- *
- * @param  $controller instance of calling controller
- */
-	function __construct (&$controller) {
-		parent::__construct($controller);
-		
-		if ($this->ext == '.ctp') {
-			$this->ext = '.html';
-		}
 	}
 
 /**
- * Renders and returns output for given view filename with its
- * array of data. If viewFilename has extension .ctp, then it delegates
- * the rendering to parent.
- *
- * @param string $___viewFn Filename of the view
- * @param array $___dataForView Data to include in rendered view
- * @param boolean $loadHelpers Boolean to indicate that helpers should be loaded.
- * @param boolean $cached Whether or not to trigger the creation of a cache file.
- * @return string Rendered output
- * @access protected
- */
-	function _render($___viewFn, $___data_for_view, $loadHelpers = true, $cached = false) {
+* SmartyView constructor
+*
+* @param  $controller instance of calling controller
+*/
+	function __construct (&$controller) {
+		parent::__construct($controller);
+
+		if ($this->ext == '.ctp') {
+			$this->ext = '.tpl';
+		}
+		$this->smarty = SmartyView::smarty($this);
+		$this->viewVars['params'] = $this->params;
+		$this->Helpers = new HelperCollection($this);
+	}
+
+/**
+* Renders and returns output for given view filename with its
+* array of data. If viewFilename has extension .ctp, then it delegates
+* the rendering to parent.
+*
+* @param string $___viewFn Filename of the view
+* @param array $___dataForView Data to include in rendered view
+* @return string Rendered output
+* @access protected
+*/
+	function _render($___viewFn, $___data_for_view = array()) {
 		$ext = pathinfo($___viewFn, PATHINFO_EXTENSION);
 		if ($ext == 'ctp') {
-			return parent::_render($___viewFn, $___data_for_view, $loadHelpers, $cached);
+			return parent::_render($___viewFn, $___data_for_view);
 		}
-		
-		if ($this->helpers != false and $loadHelpers === true) {
-			$loadedHelpers = $this->_loadHelpers($loadedHelpers, $this->helpers);
-			$helpers = array_keys($loadedHelpers);
-			
-			foreach ($loadedHelpers as $name => $helper) {
-				$helperName = Inflector::variable($name);
-				$this->loaded[$helperName] = $helper;
-				$this->{$name} = $helper;
-			}
-			$this->_triggerHelpers('beforeRender');
+
+		if (empty($___data_for_view)) {
+			$___data_for_view = $this->viewVars;
 		}
-		
-		$smarty = SmartyView::smarty($this);
-		foreach ($this->loaded as $name => $helper) {
-			$smarty->assign($name, $helper);
-		}
-		
+		extract($___data_for_view, EXTR_SKIP);
+
 		foreach($___data_for_view as $data => $value) {
 			if (!is_object($data)) {
-				$smarty->assign($data, $value);
+				$this->smarty->assign($data, $value);
 			}
 		}
-		
-		$smarty->assignByRef('view', $this);
-		$smarty->cache = $cached;
-		
-		$out = $smarty->fetch($___viewFn);
-		
-		if ($loadHelpers === true) {
-			$this->_triggerHelpers('afterRender');
-		}
-		
+
+		$this->smarty->assignByRef('view', $this);
+
+		$out = $this->smarty->fetch($___viewFn);
+
 		return $out;
 	}
+
+/**
+ * Interact with the HelperCollection to load all the helpers.
+ *
+ * @return void
+ */
+	public function loadHelpers() {
+		$helpers = HelperCollection::normalizeObjectArray($this->helpers);
+		foreach ($helpers as $name => $properties) {
+			list($plugin, $class) = pluginSplit($properties['class']);
+			$this->{$class} = $this->Helpers->load($properties['class'], $properties['settings']);
+			$this->smarty->assign($name, $this->{$class});
+		}
+		$this->_helpersLoaded = true;
+	}
+
 }
 
