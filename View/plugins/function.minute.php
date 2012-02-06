@@ -1,7 +1,7 @@
 <?php
 
 function smarty_function_minute($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
+	if (property_exists($template->smarty->view, 'Form')) {
 		trigger_error("{minute} command requires Form helper.", E_USER_ERROR);
 	}
 	
@@ -13,7 +13,7 @@ function smarty_function_minute($params, $template) {
 	unset($params['name']);
 	unset($params['selected']);
 	
-	$form = $template->smarty->view->loaded['form'];
+	$form = $template->smarty->view->Form;
 	
 	return $form->minute($name, $selected, $params);
 }

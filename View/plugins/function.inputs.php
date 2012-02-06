@@ -1,7 +1,7 @@
 <?php
 
 function smarty_function_inputs($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
+	if (property_exists($template->smarty->view, 'Form')) {
 		trigger_error("{inputs} command requires Form helper.", E_USER_ERROR);
 	}
 	
@@ -11,7 +11,7 @@ function smarty_function_inputs($params, $template) {
 	
 	unset($params['fields']);
 	
-	$form = $template->smarty->view->loaded['form'];
+	$form = $template->smarty->view->Form;
 	
 	
 	return $form->inputs($fields, $params);

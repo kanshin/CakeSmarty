@@ -2,7 +2,7 @@
 
 function smarty_function_datetime($params, $template) {
 	$s = $template->smarty;
-	$form = $s->viewHelper('datetime', 'form');
+	$form = $s->viewHelper('datetime', 'Form');
 	$s->fixHtmlAttributes($params);
 	
 	$name = $s->fetchVar($params, 'name', 'fieldName');

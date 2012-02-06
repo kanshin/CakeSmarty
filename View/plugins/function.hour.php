@@ -2,7 +2,7 @@
 
 function smarty_function_hour($params, $template) {
 	$s = $template->smarty;
-	$form = $s->viewHelper('hour', 'form');
+	$form = $s->viewHelper('hour', 'Form');
 	$s->fixHtmlAttributes($params);
 	
 	$name = $s->fetchVar($params, 'name', 'fieldName');

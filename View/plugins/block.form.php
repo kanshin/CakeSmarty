@@ -2,7 +2,7 @@
 
 function smarty_block_form($params, $content, $template, &$repeat) {
 	$smarty = $template->smarty;
-	$form = $smarty->viewHelper('form', 'form');
+	$form = $smarty->viewHelper('form', 'Form');
 	
 	if (is_null($content)) {
 		// opening tag

@@ -1,7 +1,7 @@
 <?php
 
 function smarty_function_isfielderror($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
+	if (property_exists($template->smarty->view, 'Form')) {
 		trigger_error("{isfielderror} command requires Form helper.", E_USER_ERROR);
 	}
 	
@@ -11,8 +11,8 @@ function smarty_function_isfielderror($params, $template) {
 	
 	unset($params['name']);
 	
-	$form = $template->smarty->view->loaded['form'];
-	
+	$form = $template->smarty->view->Form;
+
 	
 	return $form->isfielderror($name);
 }

@@ -10,7 +10,7 @@ class PaginatorBlock {
 		$smarty = $template->smarty;
 		
 		$this->template = $template;
-		$this->paginator = $smarty->viewHelper('paginator', 'paginator');
+		$this->paginator = $smarty->viewHelper('paginator', 'Paginator');
 		$this->model = $smarty->fetchVar($params, 'model');
 	}
 	

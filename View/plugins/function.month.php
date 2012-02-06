@@ -1,7 +1,7 @@
 <?php
 
 function smarty_function_month($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
+	if (property_exists($template->smarty->view, 'Form')) {
 		trigger_error("{month} command requires Form helper.", E_USER_ERROR);
 	}
 	
@@ -13,7 +13,7 @@ function smarty_function_month($params, $template) {
 	unset($params['title']);
 	unset($params['selected']);
 	
-	$form = $template->smarty->view->loaded['form'];
+	$form = $template->smarty->view->Form;
 	
 	return $form->month($title, $selected, $params);
 }

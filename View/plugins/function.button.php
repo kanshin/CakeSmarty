@@ -2,7 +2,7 @@
 
 function smarty_function_button($params, $template) {
 	$s = $template->smarty;
-	$form = $s->viewHelper('button', 'form');
+	$form = $s->viewHelper('button', 'Form');
 	$s->fixHtmlAttributes($params);
 	
 	$title = $s->fetchVar($params, 'title', 'value');

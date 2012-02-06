@@ -1,8 +1,8 @@
 <?php
 
 function smarty_function_label($params, $template) {
-	if (empty($template->smarty->view->loaded['form'])) {
-		trigger_error("{label} command requires Form helper.", E_USER_ERROR);
+	if (property_exists($template->smarty->view, 'Form')) {
+			trigger_error("{label} command requires Form helper.", E_USER_ERROR);
 	}
 	
 	$name = 'foo';
@@ -13,7 +13,7 @@ function smarty_function_label($params, $template) {
 	unset($params['name']);
 	unset($params['text']);
 	
-	$form = $template->smarty->view->loaded['form'];
+	$form = $template->smarty->view->Form;
 	
 	
 	return $form->label($name, $text, $params);
