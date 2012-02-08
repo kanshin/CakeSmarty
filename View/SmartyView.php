@@ -46,6 +46,15 @@ class SmartyView extends ThemeView {
 		$smarty->template_dir = APP.DS.'View'.DS;
 		$smarty->config_dir = APP.DS.'View'. DS. 'Smarty'.DS;
 
+		$caching = Configure::read('Smarty.caching');
+		if (!empty($caching)) {
+			$smarty->setCaching($caching);
+		}
+		$debugging = Configure::read('Smarty.debugging');
+		if (!empty($debugging)) {
+			$smarty->debugging = $debugging;
+		}
+
 		try {
 			$smarty->configLoad('default.ini');
 		} catch (SmartyException $e) {
