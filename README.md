@@ -1,4 +1,4 @@
-# CakeSmarty - Plugin to integrate CakePHP 1.3 and Smarty 3
+# CakeSmarty - Plugin to integrate CakePHP 2.0 and Smarty 3
 
 CakeSmarty is a plugin for CakePHP, which enables Smarty based view system.
 
@@ -6,11 +6,13 @@ LGPL License.
 
 ## Install
 
-	$ git submodule add git://github.com/kanshin/CakeSmarty.git plugins/smarty
+	$ git submodule add git://github.com/shimotori/CakeSmarty.git plugins/Smarty
 
 * Just put the directory into the plugin directory (ROOT/plugins or ROOT/app/plugins).
-* The name of directory is whatever you like. "smarty" is recommended.
-* Smarty library is bundled in the package.
+* The name of directory is whatever you like. "Smarty" is recommended.
+* Smarty library is bundled in the package ("Vendor" directory). You need to
+  rename the directory of Smarty package, which you want to use, to "smarty".
+* Smarty config_dir is app/View/Smarty.
 
 ## How to use
 
@@ -18,12 +20,12 @@ In your AppController, add:
 
 	public $view = 'Smarty.Smarty';
 
-The SmartyView is placed in *plugins/smarty*, the first part is the name of
+The SmartyView is placed in *plugins/Smarty/View*, the first part is the name of
 plugin itself and the second part is the name of View system. If you change the
 name of plugin, change the first part as such.
 
-Template fils should be placed in views directory, just as you used to do. 
-Default extension is .html, which you can change.
+Template files should be placed in View directory, just as you used to do.
+Default extension is .tpl, which you can change.
 
 If it cannot find smarty view file, and there are CakePHP template file (.ctp), 
 it delegate the work to default view renderer. It means you can mix Smarty View 
@@ -87,4 +89,6 @@ Almost all of them are just wrapper code. It uses helpers and Cake code internal
 
 * date - format the date using date() or strftime(). If '%' character is found in the format string, 
 	strftime() is used. Otherwise date() is used. You can specify default format in *views/config/default.in*.
+
+* t - translate a text using __().
 
