@@ -6,7 +6,7 @@ LGPL License.
 
 ## Install
 
-	$ git submodule add git://github.com/shimotori/CakeSmarty.git plugins/Smarty
+	$ git submodule add git://github.com/kanshin/CakeSmarty.git plugins/Smarty
 
 * Just put the directory into the plugin directory (ROOT/plugins or ROOT/app/plugins).
 * The name of directory is whatever you like. "Smarty" is recommended.
@@ -91,4 +91,12 @@ Almost all of them are just wrapper code. It uses helpers and Cake code internal
 	strftime() is used. Otherwise date() is used. You can specify default format in *views/config/default.in*.
 
 * t - translate a text using __().
+
+
+## Configuration
+
+You can set any Smarty class variable in app/Config/bootstrap.php as follows:
+
+	App::import('Vendor', 'Smarty.Smarty', array('file' => 'smarty'.DS.'libs'.DS.'Smarty.class.php'));
+	Configure::write('Smarty.caching', Smarty::CACHING_LIFETIME_CURRENT);
 
